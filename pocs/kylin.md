@@ -1,0 +1,25 @@
+# Apache Kylin
+## Descrição de Recursos
+### Autor: Pedro Mathias Nakibar
+
+  Nascido das trincheiras dos Ebay, famoso serviço de comércio eletrônico, para superar algumas das expectativas que o Apache Hadoop não atendia: Kylin, um motor distribuído de análise de dados (distributed analytics engine).
+  O seu principal foco é acelerar as consultas que o Hadoop realiza e fornecer uma interface já muito conhecida e popular, o SQL, que permite o uso de diversas ferramentas já estabelecidas para lidar com a linguagem, como o Java JDBC, e também entregando análise de dados multidimensionais (OLAP). Tudo isso funcionando em cima do Apache Hadoop, uma plataforma de computação em cluster extremamente estável e utilizada em produção por muitas empresas no mundo inteiro, em destaque o Ebay que foi o criador, que também está em constante desenvolvimento, expansão e extensão.
+  A interface SQL é a nossa principal aliada quando se trata de extração de dados de banco de dados, não é por menos, ele já está aí a mais de 20 anos e ninguém nunca reclamou. A DSL é extremamente útil, pois permite ter uma abstração de alto-nível sobre as funções mais básicas e únicas de um banco de dados, de maneira fácil. O Kylin se apropria dessas características para promover uma síntese ainda mais forte sobre o banco de dados: A Distribuição. 
+  O contexto da concepção das ideias base do Kylin foram bem simples; Os usuários estavam pedindo por latências menores em execuções de queries, porém a base de dados apenas crescia e ficava mais abrangente, e eles também queriam continuar com suas ferramentas favoritas como Tableau e Excel.
+  O uso do Kylin agregou muito valor ao nosso Stack de produção. Como já utilizamos o Hadoop e o Spark, entre outras ferramentas da Apache Foundation, a conversa entre elas é extremamente natural, visto que geralmente uma ferramenta é feita em cima ou utilizando outra. A necessidade de não ter que conhecer uma nova linguagem ou ferramenta, foi bem benéfico, o SQL é o nosso aliado a muito tempo, e com ele os problema e as limitações que nós aprendemos a superar. A velocidade de execução de queries é surpreendente, uma vez que ele foi feito para superar o Hadoop, principalmente em conjunto de dados com mais de 10 bilhões de linhas. A integração dele com ferramentas já existentes também foi essencial, como ODBC e o Tableau foram essenciais para ele ser escolhido para nossa arquitetura.
+  O diferencial do Kylin é que ele foi feito para OLAP e MOLAP. A arquitetura dele é focada em serviços, podendo ser acessada de diversas formas, com o ODBC/JDBC que foi falado anteriormente, ou por uma API restful. A sua execução é bastante inteligente também: Uma vez que uma query é executada, seu resultado fica salvo para evitar o reprocessamento. Esse caching que acontece é justamente para poder ter um acesso imediato a informação, mesmo que a query seja executada em um tempo pequeno, o processamento não precisa de ocorrer mais de uma vez, com isso guardamos utilizando o HBase, uma tecnologia também da Fundação Apache, para fazer esse tipo de procedimento de caching. O cache sempre será apagado depois um tempo para evitar informações desatualizadas, ou podendo ser apagado manualmente também.
+
+![Arquitetura do Kylin](http://syntelli.com/wp-content/uploads/kylin1.png)
+
+  A imagem representa, em alto nível, a arquitetura do Kylin:
+
+  * O REST Server (Servidor REST), serve como entrada e saída de dados, e responde a consultas SQL;
+  * Query Engine (Mecanismo de Query), ele compreende as queries de usuários, que são recebidas pelo REST Serv    er, um vez que os cubos já estão montados;
+  * A parte de Routing é o roteamento, que seleciona de quem vai ser retirado a informação, entra diretamente no caching que já foi falado, se a query já tiver sido processada, ele vai retirar diretamente do HBase, caso contrário, ele irá processado.
+  * A parte de Metadata corresponde ao gerenciador de metadados, que é justamento a espinha dorsal do Kylin, ele gerencia os metadados da aplicação, incluindo os de cubos, e toda aplicação é dependente desse componente.
+
+  Com essas informações, nós escolhemos o Kylin, por ser escalável, assim como as outras tecnologias que nós utilizamos. Além disso, ele é extremamente inteligente, evitando o reprocessamento de resultados com caching. Apesar de evitar o reprocessamento, isso não é um indicativo de que ele é lento, ele é extremamente rápido, foi feito com esse objetivo, o reprocessamento é para tornar ainda mais rápido, com o intuito de conseguir entregar as repostas em tempos menores que um segundo, evitando ao máximo o processamento desnecessário, isso também contribui para que o sistema seja extremamente responsivo, fortalecendo a capacidade de responder imediatamente as requisições, não precisando nem mesmo processar a query, fortalecendo ainda mais a capacidade de responder a muitas requisições simultâneas.
+
+#### Fontes:
+* http://apache.kylin.org
+* http://www.ebaytechblog.com/2014/10/20/announcing-kylin-extreme-olap-engine-for-big-data/
